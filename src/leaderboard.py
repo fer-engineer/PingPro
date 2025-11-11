@@ -11,7 +11,7 @@ class Leaderboard:
         try:
             with open('assets/scores.json', 'r') as f:
                 return json.load(f)
-        except:
+        except (FileNotFoundError, json.JSONDecodeError):
             return []
             
     def save_scores(self):
@@ -30,59 +30,58 @@ class Leaderboard:
             'score': score,
             'date': datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         })
-        # Ordenar por puntuación (mayor primero)
         self.scores.sort(key=lambda x: x['score'], reverse=True)
-        # Mantener solo top 10
         self.scores = self.scores[:10]
         self.save_scores()
         
     def draw(self, screen):
-        title_font = pygame.font.Font(None, 48)
-        font = pygame.font.Font(None, 32)
-        small_font = pygame.font.Font(None, 28)
-        
-        # Fondo
-        screen.fill(Colors.BACKGROUND)
-        
+        try:
+            title_font = pygame.font.SysFont('segoeui', 48, bold=True)
+            header_font = pygame.font.SysFont('segoeui', 32, bold=True)
+            font = pygame.font.SysFont('segoeui', 30)
+            small_font = pygame.font.SysFont('segoeui', 26)
+        except:
+            title_font = pygame.font.Font(None, 52)
+            header_font = pygame.font.Font(None, 36)
+            font = pygame.font.Font(None, 34)
+            small_font = pygame.font.Font(None, 30)
+
         # Título
-        title = title_font.render("🏆 MEJORES PUNTAJES", True, Colors.ACCENT)
+        title = title_font.render("Mejores Puntajes", True, Colors.PRIMARY)
         screen.blit(title, (screen.get_width()//2 - title.get_width()//2, 80))
         
+        # Contenedor principal
+        container_rect = pygame.Rect(screen.get_width()//2 - 350, 150, 700, 400)
+        pygame.draw.rect(screen, (20, 40, 70, 180), container_rect, border_radius=15)
+        pygame.draw.rect(screen, Colors.PRIMARY, container_rect, 2, border_radius=15)
+
         # Encabezados
-        headers = ["Posición", "Nombre", "Puntuación", "Fecha"]
-        header_x_positions = [100, 250, 450, 600]
+        headers = ["#", "Nombre", "Puntuación", "Fecha"]
+        header_x_positions = [container_rect.x + 40, container_rect.x + 120, container_rect.x + 350, container_rect.x + 500]
         
         for i, header in enumerate(headers):
-            text = font.render(header, True, Colors.PRIMARY)
-            screen.blit(text, (header_x_positions[i], 150))
+            text = header_font.render(header, True, Colors.ACCENT)
+            screen.blit(text, (header_x_positions[i], container_rect.y + 20))
         
         # Línea separadora
-        pygame.draw.line(screen, Colors.PRIMARY, (50, 180), (750, 180), 2)
+        pygame.draw.line(screen, Colors.PRIMARY, (container_rect.left + 20, container_rect.y + 60), (container_rect.right - 20, container_rect.y + 60), 1)
         
         # Puntuaciones
         for i, score_data in enumerate(self.scores):
-            y_pos = 220 + i * 40
-            
-            # Fondo alternado para filas
-            if i % 2 == 0:
-                pygame.draw.rect(screen, (30, 40, 60), (50, y_pos-5, 700, 35))
+            y_pos = container_rect.y + 80 + i * 32
             
             # Posición
-            pos_text = font.render(f"{i+1}.", True, Colors.TEXT)
+            pos_text = font.render(f"{i+1}", True, Colors.WHITE)
             screen.blit(pos_text, (header_x_positions[0], y_pos))
             
             # Nombre
-            name_text = font.render(score_data['name'][:15], True, Colors.TEXT)
+            name_text = font.render(score_data['name'][:15], True, Colors.WHITE)
             screen.blit(name_text, (header_x_positions[1], y_pos))
             
             # Puntuación
-            score_text = font.render(str(score_data['score']), True, Colors.ACCENT)
+            score_text = font.render(str(score_data['score']), True, Colors.SUCCESS)
             screen.blit(score_text, (header_x_positions[2], y_pos))
             
             # Fecha
-            date_text = small_font.render(score_data['date'], True, Colors.TEXT)
+            date_text = small_font.render(score_data['date'], True, (150, 150, 180))
             screen.blit(date_text, (header_x_positions[3], y_pos))
-        
-        # Instrucción
-        instruction = font.render("Presiona ESC para volver al menú", True, Colors.SECONDARY)
-        screen.blit(instruction, (screen.get_width()//2 - instruction.get_width()//2, 550))

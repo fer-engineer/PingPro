@@ -34,18 +34,18 @@ class GestureController:
         self.frame_counter = 0
 
     def process_frame(self):
-        """Procesa un frame de la cámara para detectar la mano (optimizado)."""
+        """Procesa un frame de la cámara para detectar la mano."""
         if not self.camera_available:
-            return
-
-        self.frame_counter += 1
-        if self.frame_counter % 3 != 0:
             return
 
         success, image = self.cap.read()
         if not success:
+            # Si falla la lectura, usar un frame negro como fallback
             self.last_frame = np.zeros((480, 640, 3), dtype=np.uint8)
             return
+
+        # Optimización: procesar una imagen más pequeña si es posible
+        # image = cv2.resize(image, (320, 240))
 
         image.flags.writeable = False
         image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
@@ -59,12 +59,15 @@ class GestureController:
 
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
+                # Usar el punto medio de la palma para más estabilidad
                 x = hand_landmarks.landmark[self.mp_hands.HandLandmark.WRIST].x
                 y = hand_landmarks.landmark[self.mp_hands.HandLandmark.WRIST].y
                 
+                # Mapeo a la pantalla
                 self.hand_x = int(x * self.screen_width)
                 self.hand_y = int(y * self.screen_height)
                 
+                # Dibujar landmarks para feedback visual
                 self.mp_draw.draw_landmarks(self.last_frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
 
     def get_hand_position_2d(self):

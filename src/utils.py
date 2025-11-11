@@ -1,8 +1,4 @@
 import pygame
-import json
-import datetime
-import numpy as np
-import pygame
 
 class Colors:
     """Colores del juego"""
@@ -69,13 +65,20 @@ class InputBox:
                 elif event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
                 else:
-                    if len(self.text) < 15:
+                    if len(self.text) < 20:
                         self.text += event.unicode
                 self.txt_surface = self.font.render(self.text, True, Colors.TEXT)
         return False
         
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect, border_radius=8)
-        pygame.draw.rect(screen, Colors.PRIMARY, self.rect, 2, border_radius=8)
-        screen.blit(self.txt_surface, (self.rect.x + 10, self.rect.y + 10))
-
+        bg_color = Colors.BUTTON_HOVER if self.active else Colors.BUTTON
+        pygame.draw.rect(screen, bg_color, self.rect, border_radius=8)
+        
+        border_color = Colors.PRIMARY if self.active else (100, 100, 100)
+        pygame.draw.rect(screen, border_color, self.rect, 2, border_radius=8)
+        
+        screen.blit(self.txt_surface, (self.rect.x + 15, self.rect.y + (self.rect.height - self.txt_surface.get_height()) // 2))
+        
+        if self.active and pygame.time.get_ticks() % 1000 < 500:
+            cursor_x = self.rect.x + 15 + self.txt_surface.get_width() + 2
+            pygame.draw.line(screen, Colors.PRIMARY, (cursor_x, self.rect.y + 10), (cursor_x, self.rect.y + self.rect.height - 10), 2)

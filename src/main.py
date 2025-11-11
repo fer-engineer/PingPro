@@ -96,14 +96,14 @@ def main():
     clock = pygame.time.Clock()
     
     print("=" * 60)
-    print("🎮 PING PONG PRO - CARGANDO...")
+    print("PING PONG PRO - CARGANDO...")
     print("=" * 60)
-    print("✨ Características disponibles:")
-    print("   • Modo Solo vs IA")
-    print("   • Control por gestos con cámara")
-    print("   • Física avanzada visible")
-    print("   • Sistema de puntuaciones")
-    print("   • Menú interactivo")
+    print("Caracteristicas disponibles:")
+    print("   - Modo Solo vs IA")
+    print("   - Control por gestos con camara")
+    print("   - Fisica avanzada visible")
+    print("   - Sistema de puntuaciones")
+    print("   - Menu interactivo")
     print("=" * 60)
     
     running = True
@@ -126,9 +126,9 @@ def main():
             running = False
             
         elif action == "start_solo":
-            print("🚀 Iniciando juego vs IA...")
+            print("Iniciando juego vs IA...")
             # Crear instancia del juego con la pantalla actual
-            game = PingPongGame(screen, "solo", None)
+            game = PingPongGame(screen)
             # Ejecutar el juego
             final_score = game.run_game()
             
@@ -137,37 +137,6 @@ def main():
                 show_name_input_screen(screen, final_score, menu.leaderboard)
                 # Recrear el menú para volver al menú principal
                 menu = ModernMenu(screen)
-
-        elif action == "wait_for_player":
-            # Pantalla de espera para el host
-            waiting = True
-            font = pygame.font.Font(None, 36)
-            while waiting and running:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        waiting = False
-                        running = False
-                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                        waiting = False
-                        # Aquí podrías añadir lógica para cerrar el servidor si el host cancela
-                
-                screen.fill(Colors.BACKGROUND)
-                text = font.render("Esperando a que un oponente se conecte...", True, Colors.TEXT)
-                screen.blit(text, (screen.get_width()//2 - text.get_width()//2, screen.get_height()//2))
-                pygame.display.flip()
-
-                if menu.network.connection:
-                    waiting = False
-                    print("✅ Oponente conectado! Iniciando partida online como Host...")
-                    game = PingPongGame(screen, "online_host", menu.network)
-                    game.run_game()
-                    menu = ModernMenu(screen) # Volver al menú después de la partida
-
-        elif action == "start_client":
-            print("✅ Conectado! Iniciando partida online como Cliente...")
-            game = PingPongGame(screen, "online_client", menu.network)
-            game.run_game()
-            menu = ModernMenu(screen) # Volver al menú después de la partida
         
         # Dibujar el menú actual
         menu.draw()
